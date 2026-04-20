@@ -1,10 +1,11 @@
 """
 KAS Archive Assistant backend.
 
-Run (from project root):
-    uvicorn server.main:app --reload
+Local dev (from project root):
+    uvicorn main:app --reload
 
 Serves /api/chat and the demo page at http://localhost:8000.
+Deployed on Vercel via its Python runtime (auto-detects `app`).
 """
 
 import json
@@ -22,7 +23,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-ROOT = Path(__file__).parent.parent
+ROOT = Path(__file__).parent
 DATA = ROOT / "data"
 
 load_dotenv(ROOT / ".env")
