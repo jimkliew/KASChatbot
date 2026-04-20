@@ -31,7 +31,6 @@ This doc covers the state of the project, what's been decided, what's outstandin
 ## Known limitations
 
 - **Retrieval quality depends on CSV description quality.** Interviews with thin descriptions (one-liners) are harder to find. Worth a content pass on the CSV if specific interviews aren't surfacing.
-- **8 CSV interviews didn't match a YouTube video** (fuzzy title matching at 72% threshold). These still show up in answers but without a working YouTube link. Acceptable for a prototype; if it's a concern, a manual title-→-video ID lookup could fix the unmatched 8.
 - **No rate limiting.** The current backend will answer as many requests as it receives. For a public Squarespace site, worth adding a simple per-IP throttle (e.g., 30 requests/minute) before going live.
 - **No analytics.** No tracking of what people ask or click. Easy to add with Google Analytics events or a simple logging table — recommended before a wider launch so KAS can see what visitors are actually searching for.
 
