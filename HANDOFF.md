@@ -101,4 +101,4 @@ Scales roughly linearly with traffic. 20K queries/month → ~$60. Worth checking
 
 ## If something's unclear
 
-The repo has inline comments where they matter. The `README.md` covers setup and deployment in more detail. For anything not covered, reach out to Sophieliew1@gmail.com.
+The repo has inline comments. The `README.md` covers setup and deployment in more detail. For anything not covered, reach out to Sophieliew1@gmail.com.
