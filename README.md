@@ -1,6 +1,6 @@
 # KAS Archive Assistant
 
-An AI chat widget that lets visitors to the Korean American Story Legacy Project site search the oral-history archive in plain English. Answers include direct links and thumbnails to the matching interviews on YouTube.
+An AI chat widget that lets visitors to the Korean American Story site search the oral-history archive in plain English. Answers include direct links and thumbnails to the matching interviews on YouTube.
 
 ## What it does
 
