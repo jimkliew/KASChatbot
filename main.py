@@ -12,6 +12,7 @@ import json
 import os
 import re
 from pathlib import Path
+from typing import Literal
 
 import anthropic
 import numpy as np
@@ -61,14 +62,20 @@ Format every answer like this:
 Hard rules:
 - Maximum 2 sentences total. Never 3.
 - Do NOT summarize what the interviewees say. Let their videos speak for themselves.
-- Only use information from the retrieved excerpts below. No inventing names, places, or dates.
 - The retrieved list is a search result from a large archive — it is NOT the whole archive. If the retrieval doesn't match the question well, just say the search didn't surface a strong match and invite the visitor to rephrase. Never apologize for earlier answers and never claim something "isn't in the archive" — you can only see this search's results.
-- Treat each question as fresh and standalone. Do not reference or reconcile with any prior turn.
-- Cite as [1], [2], etc., matching the numbered list in the user turn."""
+- Cite as [1], [2], etc., matching the numbered list in THIS turn's retrieved interviews. The numbers reset every turn — do NOT reuse citation numbers from any earlier turn.
+- Only claim facts about interviews that appear in THIS turn's numbered list. Never make factual claims about interviews mentioned only in a prior turn.
+- You MAY use the prior turn to interpret short follow-ups (pronouns like "her", phrases like "tell me more", "anything else like that"). If the new question is unrelated to the prior turn, ignore the prior turn and treat it as a fresh search."""
+
+
+class HistoryTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4000)
 
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
+    history: list[HistoryTurn] = Field(default_factory=list, max_length=2)
 
 
 VERSION_TAG_RE = re.compile(r"\s*\((full|edited|short|trailer)\)\s*", re.I)
@@ -190,12 +197,23 @@ def chat(req: ChatRequest):
         f"---\nVisitor's question: {req.message}"
     )
 
+    # Prepend the prior turn (at most one user + one assistant message).
+    # Strip [N] citation markers from the prior assistant text so stale
+    # numbers can't bleed into this turn's answer.
+    messages: list[dict] = []
+    for turn in req.history[-2:]:
+        content = turn.content
+        if turn.role == "assistant":
+            content = re.sub(r"\s*\[\d+\]", "", content).strip()
+        messages.append({"role": turn.role, "content": content})
+    messages.append({"role": "user", "content": user_turn})
+
     try:
         resp = claude.messages.create(
             model=MODEL,
             max_tokens=512,
             system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_turn}],
+            messages=messages,
         )
     except anthropic.APIError as e:
         raise HTTPException(status_code=502, detail=f"Claude API error: {e.message}")

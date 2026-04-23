@@ -28,6 +28,7 @@
   ];
 
   let isSending = false;
+  let lastTurn = null; // { userContent, assistantContent } — enables short-follow-up continuity.
 
   /* ---------- icons ---------- */
   const chatIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
@@ -241,10 +242,16 @@
     const typing = addTypingIndicator();
 
     try {
+      const history = lastTurn
+        ? [
+            { role: 'user', content: lastTurn.userContent },
+            { role: 'assistant', content: lastTurn.assistantContent },
+          ]
+        : [];
       const resp = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history }),
       });
       typing.remove();
 
@@ -256,6 +263,7 @@
 
       const data = await resp.json();
       addAssistantMessage(data.answer, data.citations);
+      lastTurn = { userContent: text, assistantContent: data.answer };
     } catch (e) {
       typing.remove();
       addError('Could not reach the server. Is it running?');
