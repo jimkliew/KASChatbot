@@ -82,6 +82,10 @@ def is_edited(title: str) -> bool:
     return "(edited)" in title.lower()
 
 
+def display_title(title: str) -> str:
+    return VERSION_TAG_RE.sub(" ", title).strip()
+
+
 # The CSV has separate rows for the (Full) and (Edited) cuts of many interviews.
 # Their embeddings land close together, so both versions used to surface as two
 # near-identical citations. Collapse them to one card per interview and prefer
@@ -127,7 +131,7 @@ def build_context(hits):
             meta.append(f"Interviewee: {record['interviewee']}")
         if record.get("date_recorded"):
             meta.append(f"Recorded: {record['date_recorded']}")
-        header = f"[{i}] {record['title']}"
+        header = f"[{i}] {display_title(record['title'])}"
         if chunk["has_transcript"]:
             body = f"Relevant transcript excerpt: \"{chunk['text'][:600]}\""
         else:
@@ -159,7 +163,7 @@ def citation_payload(hits, cited: set[int]):
                 url = f"https://www.youtube.com/watch?v={vid}&t={start}s"
         out.append({
             "index": i,
-            "title": record["title"],
+            "title": display_title(record["title"]),
             "interviewee": record.get("interviewee") or None,
             "date": record.get("date_recorded") or None,
             "youtube_url": url,
